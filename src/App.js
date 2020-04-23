@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component } from 'react'
+import React, { Component, useState } from 'react'
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 
@@ -19,21 +19,35 @@ export default function App () {
     zoom: 13
   }
 
+  const [markers, setMarkers] = useState([])
+
+  const addMarker = e => {
+    const { lat, lng } = e.latlng
+    const newMarker = [lat, lng]
+    setMarkers([...markers, newMarker])
+  }
+
+  const removeMarker = index =>
+    setMarkers(markers => markers.filter((_, i) => i !== index))
+
   return (
     <Map
       center={[pos.lat, pos.lng]}
       zoom={pos.zoom}
       style={{ height: '500px', width: '500px' }}
+      onClick={addMarker}
     >
       <TileLayer
         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
       />
-      <Marker position={[pos.lat, pos.lng]}>
-        <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-        </Popup>
-      </Marker>
+      {markers.map(([lat, lng], index) => (
+        <Marker position={[lat, lng]}>
+          <Popup>
+            <span onClick={() => removeMarker(index)}> remove marker</span>
+          </Popup>
+        </Marker>
+      ))}
     </Map>
   )
 }
