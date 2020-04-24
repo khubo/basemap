@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component, useState } from 'react'
+import React, { Component, useState, useEffect } from 'react'
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 
@@ -13,13 +13,27 @@ L.Icon.Default.mergeOptions({
 })
 
 export default function App () {
-  const pos = {
-    lat: 51.505,
-    lng: -0.09,
-    zoom: 13
-  }
-
+  const [position, setPosition] = useState([51.505, -0.09])
   const [markers, setMarkers] = useState([])
+
+  useEffect(() => {
+    console.log('this is called')
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords
+        setPosition([latitude, longitude])
+        addMarker({
+          latlng: {
+            lat: latitude,
+            lng: longitude
+          }
+        })
+      },
+      err => {
+        console.log('error getting current location', err)
+      }
+    )
+  }, [])
 
   const addMarker = e => {
     const { lat, lng } = e.latlng
@@ -32,9 +46,9 @@ export default function App () {
 
   return (
     <Map
-      center={[pos.lat, pos.lng]}
-      zoom={pos.zoom}
-      style={{ height: '500px', width: '500px' }}
+      center={position}
+      zoom={13}
+      style={{ height: '800px', width: '800px' }}
       onClick={addMarker}
     >
       <TileLayer
